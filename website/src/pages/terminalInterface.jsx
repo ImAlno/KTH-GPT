@@ -83,8 +83,9 @@ function TerminalInterface() {
                     {/* ⭐ Neon ASCII Banner */}
 
                     {/* ⭐ Neon ASCII Banner */}
-                    <pre className="ascii-banner">
-                        {String.raw`
+                    <div className="banner-container">
+                        <pre className="ascii-banner">
+                            {String.raw`
 ██╗  ██╗████████╗██╗  ██╗         ██████╗ ██████╗ ████████╗
 ██║ ██╔╝╚══██╔══╝██║  ██║        ██╔════╝ ██╔══██╗╚══██╔══╝
 █████╔╝    ██║   ███████║ █████╗ ██║  ███╗██████╔╝   ██║   
@@ -92,7 +93,9 @@ function TerminalInterface() {
 ██║  ██╗   ██║   ██║  ██║        ╚██████╔╝██║        ██║   
 ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝         ╚═════╝ ╚═╝        ╚═╝     
 `}
-                    </pre>
+                        </pre>
+                        <img src="/logo.png" alt="KTH-GPT Logo" className="terminal-logo" />
+                    </div>
 
                     {/* Terminal History Lines */}
                     {history.map((entry, index) => (

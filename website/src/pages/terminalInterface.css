@@ -192,3 +192,32 @@
 .prompt {
     text-shadow: 0 0 5px rgba(0, 255, 0, 0.3);
 }
+
+/* Banner and Logo Styles */
+.banner-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+    padding-right: 1rem;
+}
+
+.ascii-banner {
+    margin: 0;
+    color: #00ff00;
+    font-weight: bold;
+    text-shadow: 0 0 5px rgba(0, 255, 0, 0.5);
+    line-height: 1.2;
+    overflow-x: hidden;
+    /* Prevent horizontal scroll from banner */
+}
+
+.terminal-logo {
+    height: 60px;
+    /* Scaled down */
+    width: auto;
+    object-fit: contain;
+    opacity: 0.9;
+    filter: drop-shadow(0 0 5px rgba(0, 255, 0, 0.3));
+    /* Green glow to match theme */
+}
