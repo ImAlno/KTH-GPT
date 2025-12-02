@@ -1,12 +1,14 @@
 import { useState, useRef, useEffect } from 'react';
 import './terminalInterface.css';
 
+const INITIAL_HISTORY = [
+    { type: 'system', text: 'KTH-GPT Terminal v1.0.0' },
+    { type: 'system', text: 'By Students for Students' },
+    { type: 'system', text: '' },
+];
+
 function TerminalInterface() {
-    const [history, setHistory] = useState([
-        { type: 'system', text: 'KTH-GPT Terminal v1.0.0' },
-        { type: 'system', text: 'By Students for Students' },
-        { type: 'system', text: '' },
-    ]);
+    const [history, setHistory] = useState(INITIAL_HISTORY);
     const [inputValue, setInputValue] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const terminalEndRef = useRef(null);
@@ -27,7 +29,15 @@ function TerminalInterface() {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!inputValue.trim() || isLoading) return;
+        const trimmedInput = inputValue.trim();
+        if (!trimmedInput || isLoading) return;
+
+        if (trimmedInput.toLowerCase() === 'clear') {
+            setHistory(INITIAL_HISTORY);
+            setInputValue('');
+            if (inputRef.current) inputRef.current.style.height = 'auto';
+            return;
+        }
 
         // Add user command to history
         const userCommand = {
@@ -37,6 +47,7 @@ function TerminalInterface() {
 
         setHistory(prev => [...prev, userCommand]);
         setInputValue('');
+        if (inputRef.current) inputRef.current.style.height = 'auto';
         setIsLoading(true);
 
         // Mock AI response
@@ -58,7 +69,7 @@ function TerminalInterface() {
     };
 
     return (
-        <div className="terminal-container">
+        <div className="terminal-container" onClick={() => !isLoading && inputRef.current?.focus()}>
             <div className="terminal-header">
                 <div className="terminal-title">
                     <span className="terminal-icon">●</span>
@@ -68,6 +79,8 @@ function TerminalInterface() {
 
             <div className="terminal-body">
                 <div className="terminal-output">
+
+                    {/* ⭐ Neon ASCII Banner */}
 
                     {/* ⭐ Neon ASCII Banner */}
                     <pre className="ascii-banner">
@@ -116,21 +129,21 @@ function TerminalInterface() {
 
                 <form onSubmit={handleSubmit} className="terminal-input-line">
                     <span className="prompt">user@kth-gpt:~$</span>
-                    <div className="input-wrapper">
-                        <span className="input-text">{inputValue}</span>
-                        <span className="cursor-blink">▊</span>
-                        <input
-                            ref={inputRef}
-                            type="text"
-                            value={inputValue}
-                            onChange={(e) => setInputValue(e.target.value)}
-                            onKeyDown={handleKeyDown}
-                            className="terminal-input"
-                            disabled={isLoading}
-                            autoComplete="off"
-                            spellCheck="false"
-                        />
-                    </div>
+                    <textarea
+                        ref={inputRef}
+                        value={inputValue}
+                        onChange={(e) => {
+                            setInputValue(e.target.value);
+                            // Auto-resize
+                            e.target.style.height = 'auto';
+                            e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px'; // Max height approx 5-6 lines
+                        }}
+                        onKeyDown={handleKeyDown}
+                        className="terminal-input"
+                        autoComplete="off"
+                        spellCheck="false"
+                        rows={1}
+                    />
                 </form>
             </div>
         </div>

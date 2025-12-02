@@ -109,6 +109,8 @@
 
 .command-text {
     color: #ffffff;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .response-prefix {
@@ -119,6 +121,8 @@
 
 .response-text {
     color: #ffffff;
+    white-space: pre-wrap;
+    word-break: break-all;
 }
 
 .system-text {
@@ -127,67 +131,32 @@
 
 .terminal-input-line {
     display: flex;
-    align-items: center;
+    align-items: baseline;
     gap: 0.5rem;
     border-top: 1px solid #333;
     padding-top: 1rem;
 }
 
-.input-wrapper {
-    flex: 1;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
-
-.input-text {
-    color: #ffffff;
-    white-space: pre;
-    /* Preserve spaces */
-    pointer-events: none;
-}
-
-.input-wrapper .cursor-blink {
-    flex-shrink: 0;
-}
-
 .terminal-input {
-    position: absolute;
-    left: 0;
-    right: 0;
+    flex: 1;
     background: transparent;
     border: none;
     outline: none;
     color: #ffffff;
     font-family: inherit;
     font-size: 1rem;
-    caret-color: transparent;
-    opacity: 0;
-    /* Hide the actual input but keep it functional */
+    resize: none;
+    overflow-y: auto;
+    padding: 0;
+    margin: 0;
+    line-height: 1.6;
+    caret-color: #00ff00;
+    display: block;
+    min-height: 1.6em;
 }
 
-.terminal-input:disabled {
-    opacity: 0;
-}
 
-/* Blinking cursor animation */
-.cursor-blink {
-    animation: blink 1s step-end infinite;
-    color: #00ff00;
-}
 
-@keyframes blink {
-
-    0%,
-    50% {
-        opacity: 1;
-    }
-
-    51%,
-    100% {
-        opacity: 0;
-    }
-}
 
 /* Loading animation */
 .loading-text {
