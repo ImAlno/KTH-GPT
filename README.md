@@ -41,3 +41,47 @@ Start the development server for the web interface:
 npm run dev
 ```
 Open your browser and navigate to the local URL provided (usually `http://localhost:5173`).
+
+## 💻 Terminal Commands
+
+The terminal interface supports various commands to enhance your experience:
+
+### General Commands
+- `help` - Display list of available commands
+- `about` - Learn more about KTH-GPT
+- `contact` - Get contact information and GitHub link
+- `clear` - Clear the terminal screen
+- `copy` - Copy the last AI response to clipboard
+
+### Fun Commands
+There are also some hidden fun commands to discover! Try exploring with `help` or experimenting with different inputs.
+
+### Theme Customization
+Change the terminal appearance with `theme <name>`:
+
+**Available Themes:**
+- `default` - Classic green terminal
+- `matrix` - Matrix-inspired green on black
+- `kth` - KTH blue and white
+- `dark` - Modern dark mode
+- `retro` - Vintage amber terminal
+- `cyberpunk` - Neon cyberpunk aesthetic
+- `chroma` - Vibrant rainbow animations
+- `purple` - Rich purple tones
+- `dracula` - Popular Dracula color scheme
+- `monokai` - Monokai editor theme
+- `solarized-light` / `solarized-dark` - Solarized themes
+- `nord` - Nord color palette
+- `synthwave` - Synthwave/vaporwave aesthetic
+- `ubuntu` - Ubuntu terminal style
+- `red-alert` - Red alert theme
+- `blue-screen` - Windows blue screen
+- `sakura` - Dark sakura pink
+- `soft-sakura` - Light sakura pink
+
+**Example:** `theme chroma` or `theme matrix`
+
+### Tips
+- Use **Tab** to autocomplete commands and theme names
+- Use **Arrow Up/Down** to navigate command history
+- Commands are case-insensitive
