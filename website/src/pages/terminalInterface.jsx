@@ -1,4 +1,8 @@
 import { useState, useRef, useEffect } from 'react';
+import { processCommand, COMMANDS, THEMES } from '../utils/commands';
+import Typewriter from '../components/Typewriter';
+import AsciiAnimation from '../components/AsciiAnimation';
+import { BRAINROT_ANIMATIONS } from '../utils/animations';
 import './terminalInterface.css';
 
 const INITIAL_HISTORY = [
@@ -11,7 +15,14 @@ function TerminalInterface() {
     const [history, setHistory] = useState(INITIAL_HISTORY);
     const [inputValue, setInputValue] = useState('');
     const [historyIndex, setHistoryIndex] = useState(-1);
+    const [theme, setTheme] = useState(() => {
+        return localStorage.getItem('kth-gpt-theme') || 'default';
+    });
+    const [isBrainrot, setIsBrainrot] = useState(false);
+    const [animationIndex, setAnimationIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [tabSearchPrefix, setTabSearchPrefix] = useState(null);
+    const [suggestion, setSuggestion] = useState('');
     const terminalEndRef = useRef(null);
     const inputRef = useRef(null);
 
@@ -28,17 +39,117 @@ function TerminalInterface() {
         inputRef.current?.focus();
     }, []);
 
+    // Auto-resize input when value changes
+    useEffect(() => {
+        if (inputRef.current) {
+            inputRef.current.style.height = 'auto';
+            inputRef.current.style.height = Math.min(inputRef.current.scrollHeight, 150) + 'px';
+        }
+    }, [inputValue]);
+
+    // Cycle brainrot animations
+    useEffect(() => {
+        let interval;
+        if (isBrainrot) {
+            interval = setInterval(() => {
+                setAnimationIndex(prev => (prev + 1) % BRAINROT_ANIMATIONS.length);
+            }, 5000);
+        }
+        return () => clearInterval(interval);
+    }, [isBrainrot]);
+
+    // Save theme to localStorage
+    useEffect(() => {
+        localStorage.setItem('kth-gpt-theme', theme);
+    }, [theme]);
+
+    // Calculate suggestion for ghost text
+    useEffect(() => {
+        const input = inputValue.toLowerCase();
+        if (!input) {
+            setSuggestion('');
+            return;
+        }
+
+        // Check for theme argument
+        if (input.startsWith('theme ')) {
+            const argPrefix = input.slice(6);
+            if (!argPrefix) {
+                setSuggestion(THEMES[0]);
+                return;
+            }
+            const matches = THEMES.filter(t => t.startsWith(argPrefix));
+            if (matches.length > 0) {
+                const match = matches[0];
+                if (match.startsWith(argPrefix)) {
+                    setSuggestion(match.slice(argPrefix.length));
+                } else {
+                    setSuggestion('');
+                }
+            } else {
+                setSuggestion('');
+            }
+            return;
+        }
+
+        // Check for command
+        const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(input));
+        if (matches.length > 0) {
+            const match = matches[0];
+            setSuggestion(match.slice(input.length));
+        } else {
+            setSuggestion('');
+        }
+    }, [inputValue]);
+
     const handleSubmit = async (e) => {
         e.preventDefault();
         const trimmedInput = inputValue.trim();
         if (!trimmedInput || isLoading) return;
 
-        if (trimmedInput.toLowerCase() === 'clear') {
-            setHistory(INITIAL_HISTORY);
-            setInputValue('');
-            setHistoryIndex(-1);
-            if (inputRef.current) inputRef.current.style.height = 'auto';
-            return;
+        // Process local commands
+        const commandResult = processCommand(trimmedInput);
+        if (commandResult) {
+            if (commandResult.type === 'clear') {
+                setHistory(INITIAL_HISTORY);
+                setInputValue('');
+                setHistoryIndex(-1);
+                return;
+            }
+
+            if (commandResult.type === 'theme') {
+                setTheme(commandResult.theme);
+                setHistory(prev => [...prev,
+                { type: 'command', text: trimmedInput },
+                { type: 'system', text: `Theme changed to ${commandResult.theme}` }
+                ]);
+                setInputValue('');
+                setHistoryIndex(-1);
+                return;
+            }
+
+            if (commandResult.type === 'response') {
+                setHistory(prev => [...prev,
+                { type: 'command', text: trimmedInput },
+                { type: 'command-response', text: commandResult.text }
+                ]);
+                setInputValue('');
+                setHistoryIndex(-1);
+                return;
+            }
+
+            if (commandResult.type === 'brainrot') {
+                const newBrainrotState = !isBrainrot;
+                setIsBrainrot(newBrainrotState);
+
+                setHistory(prev => [...prev,
+                { type: 'command', text: trimmedInput },
+                { type: 'system', text: newBrainrotState ? 'INITIATING BRAINROT PROTOCOL...' : 'Brainrot deactivated.' }
+                ]);
+                setInputValue('');
+                setHistoryIndex(-1);
+                return;
+            }
         }
 
         // Add user command to history
@@ -50,7 +161,6 @@ function TerminalInterface() {
         setHistory(prev => [...prev, userCommand]);
         setInputValue('');
         setHistoryIndex(-1);
-        if (inputRef.current) inputRef.current.style.height = 'auto';
         setIsLoading(true);
 
         // Mock AI response
@@ -90,11 +200,59 @@ function TerminalInterface() {
                 setHistoryIndex(newIndex);
                 setInputValue(commands[newIndex]);
             }
+        } else if (e.key === 'Tab') {
+            e.preventDefault();
+
+            // Determine the prefix to search for (either current input or stored prefix)
+            const currentInput = inputValue;
+            const searchPrefix = tabSearchPrefix !== null ? tabSearchPrefix : currentInput;
+
+            // If we haven't stored a prefix yet, store it now
+            if (tabSearchPrefix === null) {
+                setTabSearchPrefix(currentInput);
+            }
+
+            // Check if we are completing a theme argument
+            if (searchPrefix.startsWith('theme ')) {
+                const argPrefix = searchPrefix.slice(6).toLowerCase();
+                const matches = THEMES.filter(t => t.startsWith(argPrefix));
+
+                if (matches.length > 0) {
+                    // Find current match in the list to cycle to next
+                    const currentArg = currentInput.slice(6).toLowerCase();
+                    const currentIndex = matches.indexOf(currentArg);
+
+                    // If current arg is in matches, pick next, otherwise pick first
+                    const nextIndex = currentIndex !== -1 ? (currentIndex + 1) % matches.length : 0;
+                    setInputValue('theme ' + matches[nextIndex]);
+                }
+                return;
+            }
+
+            // Otherwise, completing a command
+            const cmdPrefix = searchPrefix.toLowerCase();
+            if (!cmdPrefix) return;
+
+            const matches = Object.keys(COMMANDS).filter(cmd => cmd.startsWith(cmdPrefix));
+
+            if (matches.length > 0) {
+                const currentCmd = currentInput.trim().toLowerCase();
+                // Check if current input matches one of the candidates (ignoring trailing space for args)
+                const currentIndex = matches.findIndex(m =>
+                    currentCmd === m || currentCmd === m + ' '
+                );
+
+                const nextIndex = currentIndex !== -1 ? (currentIndex + 1) % matches.length : 0;
+                const match = matches[nextIndex];
+
+                const needsSpace = COMMANDS[match].allowArgs;
+                setInputValue(match + (needsSpace ? ' ' : ''));
+            }
         }
     };
 
     return (
-        <div className="terminal-container" onClick={() => !isLoading && inputRef.current?.focus()}>
+        <div className={`terminal-container ${theme}`}>
             <div className="terminal-header">
                 <div className="terminal-title">
                     <span className="terminal-icon">●</span>
@@ -119,7 +277,13 @@ function TerminalInterface() {
 ╚═╝  ╚═╝   ╚═╝   ╚═╝  ╚═╝         ╚═════╝ ╚═╝        ╚═╝     
 `}
                         </pre>
-                        <img src="/logo.png" alt="KTH-GPT Logo" className="terminal-logo" />
+                        {isBrainrot && (
+                            <AsciiAnimation
+                                className="terminal-logo"
+                                speed={100}
+                                frames={BRAINROT_ANIMATIONS[animationIndex]}
+                            />
+                        )}
                     </div>
 
                     {/* Terminal History Lines */}
@@ -133,7 +297,15 @@ function TerminalInterface() {
                             )}
                             {entry.type === 'response' && (
                                 <>
-                                    <span className="response-prefix">[AI]</span>
+                                    <span className="response-prefix">[AI] </span>
+                                    <span className="response-text">
+                                        <Typewriter text={entry.text} onUpdate={scrollToBottom} />
+                                    </span>
+                                </>
+                            )}
+                            {entry.type === 'command-response' && (
+                                <>
+                                    <span className="response-prefix">[SYSTEM] </span>
                                     <span className="response-text">{entry.text}</span>
                                 </>
                             )}
@@ -157,22 +329,26 @@ function TerminalInterface() {
 
                 <form onSubmit={handleSubmit} className="terminal-input-line">
                     <span className="prompt">user@kth-gpt:~$</span>
-                    <textarea
-                        ref={inputRef}
-                        value={inputValue}
-                        onChange={(e) => {
-                            setInputValue(e.target.value);
-                            setHistoryIndex(-1);
-                            // Auto-resize
-                            e.target.style.height = 'auto';
-                            e.target.style.height = Math.min(e.target.scrollHeight, 150) + 'px'; // Max height approx 5-6 lines
-                        }}
-                        onKeyDown={handleKeyDown}
-                        className="terminal-input"
-                        autoComplete="off"
-                        spellCheck="false"
-                        rows={1}
-                    />
+                    <div className="input-wrapper">
+                        <div className="terminal-ghost">
+                            {inputValue}<span className="ghost-suggestion">{suggestion}</span>
+                        </div>
+                        <textarea
+                            ref={inputRef}
+                            value={inputValue}
+                            onChange={(e) => {
+                                setInputValue(e.target.value);
+                                setHistoryIndex(-1);
+                                setTabSearchPrefix(null);
+                            }}
+                            onKeyDown={handleKeyDown}
+                            onClick={() => inputRef.current?.focus()}
+                            className="terminal-input"
+                            autoComplete="off"
+                            spellCheck="false"
+                            rows={1}
+                        />
+                    </div>
                 </form>
             </div>
         </div>
