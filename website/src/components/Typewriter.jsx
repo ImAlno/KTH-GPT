@@ -1,13 +1,15 @@
 import { useState, useEffect, useRef } from 'react';
 
-const Typewriter = ({ text, speed = 30, onUpdate }) => {
+const Typewriter = ({ text, speed = 30, onUpdate, onComplete }) => {
     const [displayedText, setDisplayedText] = useState('');
     const onUpdateRef = useRef(onUpdate);
+    const onCompleteRef = useRef(onComplete);
     const indexRef = useRef(0);
 
     useEffect(() => {
         onUpdateRef.current = onUpdate;
-    }, [onUpdate]);
+        onCompleteRef.current = onComplete;
+    }, [onUpdate, onComplete]);
 
     useEffect(() => {
         setDisplayedText('');
@@ -20,6 +22,7 @@ const Typewriter = ({ text, speed = 30, onUpdate }) => {
                 if (onUpdateRef.current) onUpdateRef.current();
             } else {
                 clearInterval(timer);
+                if (onCompleteRef.current) onCompleteRef.current();
             }
         }, speed);
 

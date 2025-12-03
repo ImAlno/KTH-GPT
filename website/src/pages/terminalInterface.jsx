@@ -21,6 +21,7 @@ function TerminalInterface() {
     const [isBrainrot, setIsBrainrot] = useState(false);
     const [animationIndex, setAnimationIndex] = useState(0);
     const [isLoading, setIsLoading] = useState(false);
+    const [isTyping, setIsTyping] = useState(false);
     const [tabSearchPrefix, setTabSearchPrefix] = useState(null);
     const [suggestion, setSuggestion] = useState('');
     const terminalEndRef = useRef(null);
@@ -105,7 +106,7 @@ function TerminalInterface() {
     const handleSubmit = async (e) => {
         e.preventDefault();
         const trimmedInput = inputValue.trim();
-        if (!trimmedInput || isLoading) return;
+        if (!trimmedInput || isLoading || isTyping) return;
 
         // Process local commands
         const commandResult = processCommand(trimmedInput);
@@ -193,6 +194,7 @@ function TerminalInterface() {
         // Mock AI response
         setTimeout(() => {
             setIsLoading(false);
+            setIsTyping(true);
             const botResponse = {
                 type: 'response',
                 text: 'I am a helpful AI assistant. I can help you with coding, writing, and analysis.'
@@ -362,7 +364,11 @@ function TerminalInterface() {
                                 <>
                                     <span className="response-prefix">[AI] </span>
                                     <span className="response-text">
-                                        <Typewriter text={entry.text} onUpdate={scrollToBottom} />
+                                        <Typewriter
+                                            text={entry.text}
+                                            onUpdate={scrollToBottom}
+                                            onComplete={() => setIsTyping(false)}
+                                        />
                                     </span>
                                 </>
                             )}
