@@ -6,6 +6,12 @@ from langchain_huggingface import HuggingFaceEmbeddings
 
 from docling_pipeline import docs_converter
 
+import logging
+logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 DOCUMENTS_FILEPATH = "data2/Max Test.pdf"
 FAISS_INDEX_DIR = "faiss_index"

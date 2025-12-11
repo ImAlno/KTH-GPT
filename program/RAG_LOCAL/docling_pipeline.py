@@ -9,6 +9,12 @@ from typing import List
 from utils import duckling_to_langchain
 from langchain_core.documents import Document
 
+import logging
+logging.getLogger().setLevel(logging.WARNING)
+logging.getLogger("sentence_transformers").setLevel(logging.WARNING)
+logging.getLogger("httpx").setLevel(logging.WARNING)
+logging.getLogger("urllib3").setLevel(logging.WARNING)
+
 EMBEDDING_MODEL = "sentence-transformers/all-MiniLM-L6-v2"
 MAX_TOKENS = 256
 
