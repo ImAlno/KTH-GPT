@@ -1,7 +1,12 @@
+docling
+faiss-cpu
+fastapi
 langchain
 langchain-community
+langchain-huggingface
 langchain-ollama
-faiss-cpu
-pandas
-
-PyPDF2
+pydantic
+python-multipart
+sentence-transformers
+transformers
+uvicorn
