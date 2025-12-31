@@ -6,10 +6,12 @@ KTH-GPT is a specialized AI assistant designed to help KTH students by providing
 
 ## 🚀 Features
 
--   **RAG-Powered Q&A**: Queries a local vector database (ChromaDB) to find relevant context from indexed PDF documents.
+-   **RAG-Powered Q&A**: Queries a local vector database (FAISS) with high-retrieval accuracy.
+-   **Smart Reranking**: Uses Cross-Encoders (`ms-marco-MiniLM-L-6-v2`) to re-rank search results, ensuring the most relevant context is used.
+-   **Advanced Document Processing**: Utilizes `HybridChunker` to intelligently split documents, preserving structure and context.
 -   **Terminal-Style Interface**: A retro, terminal web interface for interacting with the AI.
--   **Local LLM Support**: Built to run with local LLMs via Ollama (defaulting to Mistral).
--   **Source Citations**: Provides sources for the generated answers to ensure transparency.
+-   **Local LLM Support**: Built to run with local LLMs via Ollama (defaulting to Llama 3.2).
+-   **Source Citations**: (Currently disabled) Provides sources for the generated answers to ensure transparency.
 
 ## 🛠️ Tech Stack
 
@@ -19,32 +21,69 @@ KTH-GPT is a specialized AI assistant designed to help KTH students by providing
 -   **CSS**: Custom styling for the terminal aesthetic.
 
 ### Backend / AI
--   **---**: 
--   **---**: 
--   **---**: 
+-   **Python**: Core programming language.
+-   **FastAPI**: API framework for the backend.
+-   **LangChain**: Orchestration framework for RAG.
+-   **FAISS**: Vector database for efficient similarity search.
+-   **Ollama**: Local LLM runner (using `llama3.2`).
+-   **Sentence Transformers**: For embedding generation.
 
 ## 📋 Prerequisites
--   **---**:
--   **---**:
--   **---**:
+
+### 1. Install Ollama
+Download and install Ollama from [ollama.com](https://ollama.com).
+
+Once installed, pull the required model by running the following command in your terminal:
+```bash
+ollama pull llama3.2
+```
+
+### 2. Environment Setup
+-   **Python 3.9+**: Required for the backend.
+-   **Node.js & npm**: Required for the frontend.
 
 ## 🏃‍♂️ Usage
--   **---**:
--   **---**:
--   **---**:
 
-### Running the Frontend
-Start the development server for the web interface:
+### 1. Configure Data Source
+You need to provide the documents (e.g., PDFs) that the AI will use as context.
+1.  Create a folder (e.g., `canvas_data`) and place your documents inside it.
+2.  Open `program/RAG_LOCAL/embeddings.py`.
+3.  Update the `DOCUMENTS_FILEPATH` variable to point to your new folder:
+    ```python
+    DOCUMENTS_FILEPATH = "path/to/your/data_folder"
+    ```
 
+### 2. Install Dependencies
+Navigate to the project root and install the required Python packages:
 ```bash
-# In the website directory
+pip install -r program/RAG_LOCAL/requirements.txt
+```
+
+### 3. Run the Backend
+You can run the backend in two modes:
+
+**API Mode (for Website)**:
+Starts the FastAPI server at `http://0.0.0.0:8000`.
+```bash
+python program/RAG_LOCAL/api.py
+```
+
+Once the backend is running, open a new terminal to start the frontend:
+```bash
+cd website
 npm run dev
 ```
 Open your browser and navigate to the local URL provided (usually `http://localhost:5173`).
 
+**CLI Mode (Terminal)**:
+Chat with the RAG system directly in your terminal.
+```bash
+python program/RAG_LOCAL/main.py
+```
+
 ## 💻 Terminal Commands
 
-The terminal interface supports various commands to enhance your experience:
+The web terminal interface supports various commands to enhance your experience:
 
 ### General Commands
 - `help` - Display list of available commands
@@ -53,35 +92,12 @@ The terminal interface supports various commands to enhance your experience:
 - `clear` - Clear the terminal screen
 - `copy` - Copy the last AI response to clipboard
 
-### Fun Commands
-There are also some hidden fun commands to discover! Try exploring with `help` or experimenting with different inputs.
-
 ### Theme Customization
-Change the terminal appearance with `theme <name>`:
+Change the terminal appearance with `theme <name>`.
 
-**Available Themes:**
-- `default` - Classic green terminal
-- `matrix` - Matrix-inspired green on black
-- `kth` - KTH blue and white
-- `dark` - Modern dark mode
-- `retro` - Vintage amber terminal
-- `cyberpunk` - Neon cyberpunk aesthetic
-- `chroma` - Vibrant rainbow animations
-- `purple` - Rich purple tones
-- `dracula` - Popular Dracula color scheme
-- `monokai` - Monokai editor theme
-- `solarized-light` / `solarized-dark` - Solarized themes
-- `nord` - Nord color palette
-- `synthwave` - Synthwave/vaporwave aesthetic
-- `ubuntu` - Ubuntu terminal style
-- `red-alert` - Red alert theme
-- `blue-screen` - Windows blue screen
-- `sakura` - Dark sakura pink
-- `soft-sakura` - Light sakura pink
+**Popular Themes:**
+- `default`, `matrix`, `kth`, `dark`, `retro`, `cyberpunk`
+- `chroma`, `purple`, `dracula`, `monokai`
+- And many more! Type `help` in the terminal for a full list.
 
-**Example:** `theme chroma` or `theme matrix`
-
-### Tips
-- Use **Tab** to autocomplete commands and theme names
-- Use **Arrow Up/Down** to navigate command history
-- Commands are case-insensitive
+**Example:** `theme chroma`
