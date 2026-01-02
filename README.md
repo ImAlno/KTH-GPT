@@ -28,6 +28,10 @@ KTH-GPT is a specialized AI assistant designed to help KTH students by providing
 -   **Ollama**: Local LLM runner (using `llama3.2`).
 -   **Sentence Transformers**: For embedding generation.
 
+## 🏗️ Architecture
+
+![KTH-GPT Architecture](assets/RAG-Architecture.png)
+
 ## 📋 Prerequisites
 
 ### 1. Install Ollama
